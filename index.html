@@ -2,78 +2,107 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>The Rumor Machine</title>
+<title>The Rumor With A Life Of Its Own</title>
 
 <style>
-/* =========================
-   CSS
-   ========================= */
 
-body {
-    font-family: Georgia, serif;
-    max-width: 800px;
-    margin: 50px auto;
-    padding: 20px;
-    color: #222;
-    line-height: 1.6;
+body{
+    font-family:Arial, sans-serif;
+    max-width:1100px;
+    margin:auto;
+    padding:30px;
+    background:#fafafa;
+    color:#222;
 }
 
-h1 {
-    font-weight: normal;
+h1{
+    font-size:42px;
 }
 
-.subtitle {
-    color: #666;
+.card{
+    background:white;
+    padding:25px;
+    margin:25px 0;
+    border-radius:18px;
+    box-shadow:0 4px 20px #ddd;
 }
 
-button {
-    padding: 10px 18px;
-    border: 1px solid #333;
-    background: white;
-    cursor: pointer;
-    font-size: 16px;
+button{
+    background:#222;
+    color:white;
+    border:0;
+    padding:12px 18px;
+    border-radius:10px;
+    cursor:pointer;
 }
 
-button:hover {
-    background: #eee;
+input{
+    width:80%;
+    padding:12px;
+    border-radius:8px;
+    border:1px solid #aaa;
 }
 
-#network {
-    position: relative;
-    height: 350px;
-    margin: 30px 0;
+
+#network{
+    position:relative;
+    height:500px;
+    background:#f3f3f3;
+    border-radius:15px;
 }
 
-.person {
-    position: absolute;
-    width: 22px;
-    height: 22px;
-    background: #222;
-    border-radius: 50%;
-    transition: .3s;
-}
 
-.person.active {
-    transform: scale(1.6);
-}
+.person{
 
-.line {
     position:absolute;
-    height:1px;
-    background:#ccc;
-    transform-origin:left center;
-}
+    width:45px;
+    height:45px;
+    border-radius:50%;
+    background:#bbb;
 
-.card {
-    border-left: 3px solid #333;
-    padding-left:15px;
-    margin-top:25px;
-}
+    display:flex;
+    justify-content:center;
+    align-items:center;
 
-.small {
-    color:#666;
     font-size:14px;
+
+    transition:.4s;
 }
+
+
+.heard{
+    background:#ffd166;
+}
+
+.shared{
+    background:#ef476f;
+    color:white;
+}
+
+
+.connection{
+
+    position:absolute;
+    height:3px;
+    background:#ef476f;
+
+    transform-origin:left center;
+
+}
+
+
+.timeline{
+    background:#f5f5f5;
+    padding:15px;
+    border-radius:10px;
+}
+
+
+.stat{
+    font-size:18px;
+    margin:10px 0;
+}
+
 </style>
 
 </head>
@@ -81,340 +110,492 @@ button:hover {
 
 <body>
 
-<h1>The Rumor Machine</h1>
 
-<p class="subtitle">
-A message travels through a group of people. Watch how small changes can become big differences.
+<h1>
+The Rumor With A Life Of Its Own
+</h1>
+
+
+<p>
+An interactive research experiment exploring how information changes when it travels through a human network.
 </p>
 
-
-<div class="card">
-<strong>Starting rumor:</strong>
-<p id="starting"></p>
-</div>
-
-
-<div id="network"></div>
-
-
-<button id="run">
-Spread the rumor
-</button>
 
 
 <div class="card">
 
-<strong>Rumor journey:</strong>
-
-<p id="journey">
-Press the button to begin.
-</p>
-
-
-<strong>Final version:</strong>
-
-<p id="result"></p>
-
-</div>
-
-
-
-<div class="card small">
-
-<h3>What is happening?</h3>
+<h2>Research Question</h2>
 
 <p>
-Every person receives the message from someone else.
-When they repeat it, the message has a small chance of changing.
+If the same message enters the same group of people, why can the ending be completely different?
 </p>
 
 <p>
-The simulation models three common effects:
+This simulation models:
 </p>
 
 <ul>
-<li><b>Uncertainty loss:</b> "might" can become "will."</li>
-<li><b>Detail loss:</b> specific details disappear.</li>
-<li><b>Exaggeration:</b> ordinary events can sound larger.</li>
+<li>Social network structure</li>
+<li>Personality differences</li>
+<li>Memory errors</li>
+<li>Information mutation</li>
 </ul>
 
+</div>
 
-<h3>Scientific honesty</h3>
 
-<p>
-This demonstrates how repeated transmission can create distortion.
-It does not prove that real rumors always behave this way.
-Real people also use judgment, emotions, trust, memory, and social context.
-</p>
+
+
+<div class="card">
+
+<h2>Experiment Setup</h2>
+
+
+<input id="rumor"
+value="The school might close tomorrow because of snow.">
+
+
+<br><br>
+
+<button onclick="runExperiment()">
+Run Experiment
+</button>
+
+<button onclick="reset()">
+Reset
+</button>
+
 
 </div>
+
+
+
+
+<div class="card">
+
+<h2>Social Network</h2>
+
+<div id="network"></div>
+
+<p id="status"></p>
+
+</div>
+
+
+
+
+
+<div class="card">
+
+<h2>Transmission History</h2>
+
+<div id="timeline" class="timeline">
+Waiting for experiment...
+</div>
+
+</div>
+
+
+
+
+
+
+<div class="card">
+
+<h2>Research Analysis</h2>
+
+<div id="analysis">
+
+Run the simulation to generate analysis.
+
+</div>
+
+</div>
+
+
+
 
 
 
 <script>
 
-/* =========================
-   JavaScript
-   ========================= */
+
+const people=[
+
+{name:"A",x:500,y:40,type:"Influencer",share:.9,change:.15},
+
+{name:"B",x:300,y:150,type:"Curious",share:.7,change:.15},
+{name:"C",x:500,y:150,type:"Skeptic",share:.25,change:.02},
+{name:"D",x:700,y:150,type:"Social",share:.8,change:.1},
 
 
-const startingRumor =
-"The science teacher might give a surprise quiz tomorrow.";
+{name:"E",x:200,y:300,type:"Private",share:.15,change:.01},
+{name:"F",x:350,y:300,type:"Dramatic",share:.7,change:.35},
+{name:"G",x:500,y:300,type:"Student",share:.5,change:.1},
+{name:"H",x:650,y:300,type:"Social",share:.8,change:.15},
+{name:"I",x:800,y:300,type:"Skeptic",share:.25,change:.02}
+
+];
 
 
-document.getElementById("starting").textContent =
-startingRumor;
+
+const connections=[
+
+[0,1],[0,2],[0,3],
+
+[1,4],[1,5],
+
+[2,6],
+
+[3,7],[3,8],
+
+[5,6],
+
+[6,7]
+
+];
 
 
 
-const peopleCount = 20;
-
-const people = [];
-
-const network =
-document.getElementById("network");
+let rumor="";
+let history=[];
 
 
-// Create people
-for(let i=0;i<peopleCount;i++){
 
-    let person =
-    document.createElement("div");
+function drawNetwork(){
 
-    person.className="person";
+let box=document.getElementById("network");
 
-
-    let x=Math.random()*85;
-    let y=Math.random()*80;
+box.innerHTML="";
 
 
-    person.style.left=x+"%";
-    person.style.top=y+"%";
+people.forEach((p,i)=>{
+
+let d=document.createElement("div");
+
+d.className="person";
+
+d.id="p"+i;
+
+d.style.left=p.x+"px";
+d.style.top=p.y+"px";
+
+d.innerHTML=p.name;
+
+d.title=p.type;
 
 
-    network.appendChild(person);
+box.appendChild(d);
 
+});
 
-    people.push({
-        element:person,
-        x:x,
-        y:y,
-        neighbors:[]
-    });
 
 }
 
 
 
-// Create real connections
 
-for(let i=0;i<peopleCount;i++){
+function line(a,b){
 
-    for(let j=i+1;j<peopleCount;j++){
+let box=document.getElementById("network");
 
-        if(Math.random()<0.18){
+let l=document.createElement("div");
 
-            people[i].neighbors.push(j);
-            people[j].neighbors.push(i);
+l.className="connection";
 
 
-            drawLine(
-                people[i],
-                people[j]
-            );
-        }
-    }
-}
+let x1=people[a].x+22;
+let y1=people[a].y+22;
+
+let x2=people[b].x+22;
+let y2=people[b].y+22;
 
 
-
-// Draw connection
-
-function drawLine(a,b){
-
-    let line =
-    document.createElement("div");
-
-    line.className="line";
+let length=Math.sqrt(
+(x2-x1)**2+
+(y2-y1)**2
+);
 
 
-    let dx=b.x-a.x;
-    let dy=b.y-a.y;
-
-    let distance =
-    Math.sqrt(dx*dx+dy*dy);
-
-
-    line.style.width =
-    distance+"%";
+let angle=Math.atan2(
+y2-y1,
+x2-x1
+);
 
 
-    line.style.left =
-    a.x+"%";
+l.style.width=length+"px";
 
-    line.style.top =
-    a.y+"%";
+l.style.left=x1+"px";
+l.style.top=y1+"px";
 
-
-    line.style.transform =
-    `rotate(${Math.atan2(dy,dx)}rad)`;
+l.style.transform=
+"rotate("+angle+"rad)";
 
 
-    network.appendChild(line);
+box.appendChild(l);
 
 }
 
 
 
-// Mutation rules
-
-function changeMessage(message){
-
-    let reason="No change";
 
 
-    if(message.includes("might")
-       && Math.random()<0.5){
+function runExperiment(){
 
-        message =
-        message.replace(
-            "might",
-            "will probably"
-        );
+reset();
 
-        reason =
-        "uncertainty became stronger";
+rumor=document.getElementById("rumor").value;
 
-    }
+let heard=[false,false,false,false,false,false,false,false,false];
+
+heard[0]=true;
 
 
-    else if(message.includes("quiz")
-            && Math.random()<0.4){
-
-        message =
-        message.replace(
-            "quiz",
-            "test"
-        );
-
-        reason =
-        "a detail changed";
-
-    }
+let rounds=0;
 
 
-    else if(message.includes("surprise")
-            && Math.random()<0.4){
+let timer=setInterval(()=>{
 
-        message =
-        message.replace(
-            "surprise quiz",
-            "huge test"
-        );
-
-        reason =
-        "the message became exaggerated";
-
-    }
+rounds++;
 
 
-    return {
-        message,
-        reason
-    };
+let spreaders=[];
+
+
+heard.forEach((h,i)=>{
+
+if(h)
+spreaders.push(i);
+
+});
+
+
+spreaders.forEach(sender=>{
+
+
+connections.forEach(edge=>{
+
+
+let target=-1;
+
+
+if(edge[0]==sender)
+target=edge[1];
+
+if(edge[1]==sender)
+target=edge[0];
+
+
+if(target!=-1&&!heard[target]){
+
+
+let chance=people[sender].share;
+
+
+if(Math.random()<chance){
+
+
+heard[target]=true;
+
+
+line(sender,target);
+
+
+if(Math.random()<people[sender].change){
+
+mutate();
+
+}
+
+
+history.push(
+
+people[sender].name+
+" told "+
+people[target].name+
+": "+rumor
+
+);
+
+
+updateTimeline();
+
+
+document
+.getElementById("p"+target)
+.classList.add("heard");
+
+
+}
+
+}
+
+
+});
+
+
+
+document
+.getElementById("p"+sender)
+.classList.add("shared");
+
+
+});
+
+
+
+document.getElementById("status").innerHTML=
+"Round "+rounds+
+" | People reached: "+
+heard.filter(x=>x).length+
+"/"+people.length;
+
+
+
+if(rounds>8){
+
+clearInterval(timer);
+
+finish(heard);
 
 }
 
 
 
-// Spread rumor
-
-document.getElementById("run")
-.onclick=function(){
-
-    let current =
-    Math.floor(Math.random()*peopleCount);
+},700);
 
 
-    let message =
-    startingRumor;
-
-
-    let steps=0;
-
-    let history=[];
-
-
-    let interval=setInterval(()=>{
-
-
-        people.forEach(p=>
-        p.element.classList.remove("active")
-        );
-
-
-        people[current]
-        .element.classList.add("active");
+}
 
 
 
-        let result =
-        changeMessage(message);
 
 
-        message =
-        result.message;
+function mutate(){
+
+let additions=[
+
+"I heard that",
+
+"Apparently",
+
+"People are saying",
+
+"Everyone knows",
+
+"Someone told me"
+
+];
+
+
+let add=
+additions[
+Math.floor(Math.random()*additions.length)
+];
+
+
+rumor=
+add+" "+rumor.toLowerCase();
+
+}
 
 
 
-        history.push(
-        "Person "+(current+1)+
-        ": "+message+
-        " ("+result.reason+")"
-        );
+
+
+function updateTimeline(){
+
+document.getElementById("timeline").innerHTML=
+
+history
+.map(x=>"<p>"+x+"</p>")
+.join("");
+
+}
 
 
 
-        let choices =
-        people[current].neighbors;
 
 
-        if(choices.length>0){
-
-            current =
-            choices[
-            Math.floor(Math.random()*choices.length)
-            ];
-
-        }
+function finish(heard){
 
 
-
-        steps++;
-
-
-        if(steps>=8){
-
-            clearInterval(interval);
+let reached=
+heard.filter(x=>x).length;
 
 
-            document.getElementById("journey")
-            .innerHTML =
-            history.join("<br><br>");
+let distortion=
+Math.min(
+100,
+Math.floor(
+(rumor.length/
+document.getElementById("rumor").value.length)
+*30
+)
+);
 
 
-            document.getElementById("result")
-            .textContent =
-            message;
+document.getElementById("analysis").innerHTML=
 
-        }
+`
+<div class="stat">
+<b>Spread:</b>
+${reached}/${people.length} people reached
+</div>
+
+<div class="stat">
+<b>Distortion score:</b>
+${distortion}%
+</div>
+
+<p>
+The rumor changed because every person acted as a filter.
+People with higher sharing tendencies accelerated spread,
+while people with higher mutation tendencies changed the message.
+</p>
+
+<p>
+This experiment demonstrates a principle from social network research:
+information is shaped not only by the original message, but also by
+the structure and behavior of the network carrying it.
+</p>
+
+<p>
+<b>Limitation:</b>
+This is a simplified model. Real human communication includes emotions,
+relationships, trust, incentives, and context.
+</p>
+
+`;
+
+}
 
 
-    },700);
 
-};
+
+
+function reset(){
+
+history=[];
+
+drawNetwork();
+
+document.getElementById("timeline").innerHTML=
+"Waiting for experiment...";
+
+document.getElementById("analysis").innerHTML=
+"Run the simulation to generate analysis.";
+
+document.getElementById("status").innerHTML="";
+
+}
+
+
+reset();
+
 
 </script>
+
 
 </body>
 </html>
