@@ -7,7 +7,7 @@
 <style>
 
 body{
-    font-family:Arial, sans-serif;
+    font-family:system-ui, sans-serif;
     max-width:1100px;
     margin:auto;
     padding:30px;
@@ -24,20 +24,22 @@ h1{
     padding:25px;
     margin:25px 0;
     border-radius:18px;
-    box-shadow:0 4px 20px #ddd;
+    box-shadow:0 5px 20px #ddd;
 }
 
+
 button{
+    padding:12px 18px;
+    border:0;
+    border-radius:10px;
     background:#222;
     color:white;
-    border:0;
-    padding:12px 18px;
-    border-radius:10px;
     cursor:pointer;
 }
 
+
 input{
-    width:80%;
+    width:90%;
     padding:12px;
     border-radius:8px;
     border:1px solid #aaa;
@@ -45,62 +47,83 @@ input{
 
 
 #network{
-    position:relative;
-    height:500px;
-    background:#f3f3f3;
-    border-radius:15px;
+
+height:520px;
+background:#f3f3f3;
+border-radius:15px;
+position:relative;
+
 }
 
 
 .person{
 
-    position:absolute;
-    width:45px;
-    height:45px;
-    border-radius:50%;
-    background:#bbb;
+position:absolute;
+width:45px;
+height:45px;
+border-radius:50%;
 
-    display:flex;
-    justify-content:center;
-    align-items:center;
+display:flex;
+align-items:center;
+justify-content:center;
 
-    font-size:14px;
+background:#bbb;
 
-    transition:.4s;
+transition:.4s;
+
+font-weight:bold;
+
 }
 
 
 .heard{
-    background:#ffd166;
-}
-
-.shared{
-    background:#ef476f;
-    color:white;
+background:#ffd166;
 }
 
 
-.connection{
+.active{
+background:#ef476f;
+color:white;
+}
 
-    position:absolute;
-    height:3px;
-    background:#ef476f;
 
-    transform-origin:left center;
+.line{
+
+position:absolute;
+height:3px;
+background:#ef476f;
+
+transform-origin:left center;
 
 }
+
 
 
 .timeline{
-    background:#f5f5f5;
-    padding:15px;
-    border-radius:10px;
+
+background:#f5f5f5;
+padding:15px;
+border-radius:12px;
+
+max-height:350px;
+overflow:auto;
+
+}
+
+
+.event{
+
+padding:10px;
+border-bottom:1px solid #ddd;
+
 }
 
 
 .stat{
-    font-size:18px;
-    margin:10px 0;
+
+font-size:18px;
+margin:10px;
+
 }
 
 </style>
@@ -117,28 +140,30 @@ The Rumor With A Life Of Its Own
 
 
 <p>
-An interactive research experiment exploring how information changes when it travels through a human network.
+A computational social science experiment exploring how information changes as it moves through people.
 </p>
 
 
 
 <div class="card">
 
-<h2>Research Question</h2>
+<h2>
+Research Question
+</h2>
 
 <p>
-If the same message enters the same group of people, why can the ending be completely different?
+A message begins as one thing. After passing through a network of people, what does it become?
 </p>
 
 <p>
-This simulation models:
+The simulation models:
 </p>
 
 <ul>
-<li>Social network structure</li>
+<li>Social connections</li>
 <li>Personality differences</li>
-<li>Memory errors</li>
-<li>Information mutation</li>
+<li>Memory distortion</li>
+<li>Information evolution</li>
 </ul>
 
 </div>
@@ -148,17 +173,19 @@ This simulation models:
 
 <div class="card">
 
-<h2>Experiment Setup</h2>
+<h2>
+Experiment
+</h2>
 
 
-<input id="rumor"
+<input id="inputRumor"
 value="The school might close tomorrow because of snow.">
 
 
 <br><br>
 
-<button onclick="runExperiment()">
-Run Experiment
+<button onclick="startSimulation()">
+Start Simulation
 </button>
 
 <button onclick="reset()">
@@ -171,13 +198,20 @@ Reset
 
 
 
+
+
 <div class="card">
 
-<h2>Social Network</h2>
+<h2>
+Network
+</h2>
 
 <div id="network"></div>
 
-<p id="status"></p>
+<p id="status">
+Waiting...
+</p>
+
 
 </div>
 
@@ -185,13 +219,19 @@ Reset
 
 
 
+
 <div class="card">
 
-<h2>Transmission History</h2>
+<h2>
+Rumor Evolution Timeline
+</h2>
 
 <div id="timeline" class="timeline">
+
 Waiting for experiment...
+
 </div>
+
 
 </div>
 
@@ -202,16 +242,19 @@ Waiting for experiment...
 
 <div class="card">
 
-<h2>Research Analysis</h2>
+<h2>
+Research Analysis
+</h2>
+
 
 <div id="analysis">
 
-Run the simulation to generate analysis.
+Run an experiment.
 
 </div>
 
-</div>
 
+</div>
 
 
 
@@ -222,18 +265,87 @@ Run the simulation to generate analysis.
 
 const people=[
 
-{name:"A",x:500,y:40,type:"Influencer",share:.9,change:.15},
+{
+name:"A",
+x:500,
+y:40,
+type:"Influencer",
+share:.9,
+distort:.15
+},
 
-{name:"B",x:300,y:150,type:"Curious",share:.7,change:.15},
-{name:"C",x:500,y:150,type:"Skeptic",share:.25,change:.02},
-{name:"D",x:700,y:150,type:"Social",share:.8,change:.1},
+{
+name:"B",
+x:300,
+y:150,
+type:"Curious",
+share:.7,
+distort:.20
+},
+
+{
+name:"C",
+x:500,
+y:150,
+type:"Skeptic",
+share:.25,
+distort:.05
+},
+
+{
+name:"D",
+x:700,
+y:150,
+type:"Social",
+share:.85,
+distort:.15
+},
 
 
-{name:"E",x:200,y:300,type:"Private",share:.15,change:.01},
-{name:"F",x:350,y:300,type:"Dramatic",share:.7,change:.35},
-{name:"G",x:500,y:300,type:"Student",share:.5,change:.1},
-{name:"H",x:650,y:300,type:"Social",share:.8,change:.15},
-{name:"I",x:800,y:300,type:"Skeptic",share:.25,change:.02}
+{
+name:"E",
+x:200,
+y:300,
+type:"Private",
+share:.15,
+distort:.02
+},
+
+{
+name:"F",
+x:350,
+y:300,
+type:"Dramatic",
+share:.75,
+distort:.40
+},
+
+{
+name:"G",
+x:500,
+y:300,
+type:"Student",
+share:.5,
+distort:.15
+},
+
+{
+name:"H",
+x:650,
+y:300,
+type:"Social",
+share:.8,
+distort:.2
+},
+
+{
+name:"I",
+x:800,
+y:300,
+type:"Skeptic",
+share:.25,
+distort:.05
+}
 
 ];
 
@@ -241,13 +353,17 @@ const people=[
 
 const connections=[
 
-[0,1],[0,2],[0,3],
+[0,1],
+[0,2],
+[0,3],
 
-[1,4],[1,5],
+[1,4],
+[1,5],
 
 [2,6],
 
-[3,7],[3,8],
+[3,7],
+[3,8],
 
 [5,6],
 
@@ -257,16 +373,17 @@ const connections=[
 
 
 
-let rumor="";
+let memories=[];
 let history=[];
+let spreadCount=[];
 
 
 
-function drawNetwork(){
+function draw(){
 
-let box=document.getElementById("network");
+let network=document.getElementById("network");
 
-box.innerHTML="";
+network.innerHTML="";
 
 
 people.forEach((p,i)=>{
@@ -275,40 +392,50 @@ let d=document.createElement("div");
 
 d.className="person";
 
-d.id="p"+i;
+d.id="person"+i;
+
 
 d.style.left=p.x+"px";
 d.style.top=p.y+"px";
 
+
 d.innerHTML=p.name;
 
-d.title=p.type;
+
+d.title=
+p.type+
+"\nShare chance: "+
+Math.round(p.share*100)+"%";
 
 
-box.appendChild(d);
+network.appendChild(d);
+
 
 });
-
 
 }
 
 
 
 
-function line(a,b){
+function drawLine(a,b){
 
-let box=document.getElementById("network");
 
-let l=document.createElement("div");
+let network=document.getElementById("network");
 
-l.className="connection";
+
+let line=document.createElement("div");
+
+line.className="line";
 
 
 let x1=people[a].x+22;
 let y1=people[a].y+22;
 
+
 let x2=people[b].x+22;
 let y2=people[b].y+22;
+
 
 
 let length=Math.sqrt(
@@ -323,16 +450,90 @@ x2-x1
 );
 
 
-l.style.width=length+"px";
+line.style.width=length+"px";
+line.style.left=x1+"px";
+line.style.top=y1+"px";
 
-l.style.left=x1+"px";
-l.style.top=y1+"px";
-
-l.style.transform=
+line.style.transform=
 "rotate("+angle+"rad)";
 
 
-box.appendChild(l);
+network.appendChild(line);
+
+
+}
+
+
+
+
+function mutate(text,person){
+
+
+let result=text;
+
+
+if(Math.random()<person.distort){
+
+
+let replacements=[
+
+["might close","will close"],
+
+["tomorrow","soon"],
+
+["because of snow","because of weather"],
+
+["school","classes"]
+
+];
+
+
+let change=
+replacements[
+Math.floor(Math.random()*replacements.length)
+];
+
+
+result=result.replace(
+change[0],
+change[1]
+);
+
+
+}
+
+
+if(Math.random()<person.distort){
+
+
+let prefixes=[
+
+"I heard",
+
+"Apparently",
+
+"Someone said",
+
+"People think",
+
+"Everyone says"
+
+];
+
+
+result=
+prefixes[
+Math.floor(Math.random()*prefixes.length)
+]
++" "+
+result.toLowerCase();
+
+
+}
+
+
+return result;
+
 
 }
 
@@ -340,93 +541,115 @@ box.appendChild(l);
 
 
 
-function runExperiment(){
+function startSimulation(){
+
 
 reset();
 
-rumor=document.getElementById("rumor").value;
+
+memories=new Array(people.length).fill("");
+
+history=[];
+
+spreadCount=new Array(people.length).fill(0);
+
+
+memories[0]=
+document.getElementById("inputRumor").value;
+
 
 let heard=[false,false,false,false,false,false,false,false,false];
 
+
 heard[0]=true;
+
+
+document
+.getElementById("person0")
+.classList.add("active");
+
 
 
 let rounds=0;
 
 
+
 let timer=setInterval(()=>{
+
 
 rounds++;
 
 
-let spreaders=[];
+people.forEach((person,i)=>{
 
 
-heard.forEach((h,i)=>{
+if(!heard[i])
+return;
 
-if(h)
-spreaders.push(i);
-
-});
-
-
-spreaders.forEach(sender=>{
 
 
 connections.forEach(edge=>{
 
 
-let target=-1;
+let target=null;
 
 
-if(edge[0]==sender)
+if(edge[0]==i)
 target=edge[1];
 
-if(edge[1]==sender)
+
+if(edge[1]==i)
 target=edge[0];
 
 
-if(target!=-1&&!heard[target]){
 
-
-let chance=people[sender].share;
-
-
-if(Math.random()<chance){
+if(
+target!==null &&
+!heard[target] &&
+Math.random()<person.share
+){
 
 
 heard[target]=true;
 
 
-line(sender,target);
-
-
-if(Math.random()<people[sender].change){
-
-mutate();
-
-}
-
-
-history.push(
-
-people[sender].name+
-" told "+
-people[target].name+
-": "+rumor
-
+let newMessage=
+mutate(
+memories[i],
+person
 );
+
+
+
+memories[target]=newMessage;
+
+
+spreadCount[i]++;
+
+
+drawLine(i,target);
+
+
+
+document
+.getElementById("person"+target)
+.classList.add("heard");
+
+
+
+history.push({
+
+from:people[i].name,
+
+to:people[target].name,
+
+message:newMessage
+
+});
 
 
 updateTimeline();
 
-
-document
-.getElementById("p"+target)
-.classList.add("heard");
-
-
-}
 
 }
 
@@ -434,10 +657,9 @@ document
 });
 
 
-
 document
-.getElementById("p"+sender)
-.classList.add("shared");
+.getElementById("person"+i)
+.classList.add("active");
 
 
 });
@@ -445,14 +667,18 @@ document
 
 
 document.getElementById("status").innerHTML=
-"Round "+rounds+
-" | People reached: "+
+
+"Round "+
+rounds+
+" | Reached "+
 heard.filter(x=>x).length+
-"/"+people.length;
+"/"+
+people.length+
+" people";
 
 
 
-if(rounds>8){
+if(rounds>=10){
 
 clearInterval(timer);
 
@@ -462,42 +688,13 @@ finish(heard);
 
 
 
-},700);
+},900);
+
 
 
 }
 
 
-
-
-
-function mutate(){
-
-let additions=[
-
-"I heard that",
-
-"Apparently",
-
-"People are saying",
-
-"Everyone knows",
-
-"Someone told me"
-
-];
-
-
-let add=
-additions[
-Math.floor(Math.random()*additions.length)
-];
-
-
-rumor=
-add+" "+rumor.toLowerCase();
-
-}
 
 
 
@@ -505,13 +702,30 @@ add+" "+rumor.toLowerCase();
 
 function updateTimeline(){
 
-document.getElementById("timeline").innerHTML=
 
-history
-.map(x=>"<p>"+x+"</p>")
-.join("");
+let box=document.getElementById("timeline");
+
+
+box.innerHTML=
+history.map(e=>`
+
+<div class="event">
+
+<b>${e.from} → ${e.to}</b>
+
+<br>
+
+"${e.message}"
+
+</div>
+
+`).join("");
+
+
 
 }
+
+
 
 
 
@@ -520,55 +734,89 @@ history
 function finish(heard){
 
 
-let reached=
-heard.filter(x=>x).length;
+let original=
+document.getElementById("inputRumor").value;
+
+
+let final=
+memories
+.filter(x=>x)
+.pop();
+
 
 
 let distortion=
 Math.min(
 100,
-Math.floor(
-(rumor.length/
-document.getElementById("rumor").value.length)
-*30
+Math.round(
+(
+1-
+(original.length/
+final.length)
+)
+*100
 )
 );
 
 
-document.getElementById("analysis").innerHTML=
 
-`
+let mostInfluential=
+people[
+spreadCount.indexOf(
+Math.max(...spreadCount)
+)
+];
+
+
+
+document.getElementById("analysis").innerHTML=`
+
 <div class="stat">
-<b>Spread:</b>
-${reached}/${people.length} people reached
+<b>Reach:</b>
+${heard.filter(x=>x).length}/${people.length}
 </div>
 
+
 <div class="stat">
-<b>Distortion score:</b>
+<b>Final rumor:</b><br>
+"${final}"
+</div>
+
+
+<div class="stat">
+<b>Estimated distortion:</b>
 ${distortion}%
 </div>
 
-<p>
-The rumor changed because every person acted as a filter.
-People with higher sharing tendencies accelerated spread,
-while people with higher mutation tendencies changed the message.
-</p>
+
+<div class="stat">
+<b>Most influential person:</b>
+${mostInfluential.name}
+(${mostInfluential.type})
+</div>
+
 
 <p>
-This experiment demonstrates a principle from social network research:
-information is shaped not only by the original message, but also by
-the structure and behavior of the network carrying it.
+The result shows that information is not simply copied.
+Each person becomes a filter. Their personality and position
+inside the network influence what survives.
 </p>
 
+
 <p>
-<b>Limitation:</b>
-This is a simplified model. Real human communication includes emotions,
-relationships, trust, incentives, and context.
+<b>Research limitation:</b>
+This is a simplified model. Real communication involves trust,
+emotion, incentives, culture, and context.
 </p>
+
 
 `;
 
+
+
 }
+
+
 
 
 
@@ -576,19 +824,24 @@ relationships, trust, incentives, and context.
 
 function reset(){
 
-history=[];
 
-drawNetwork();
+draw();
+
 
 document.getElementById("timeline").innerHTML=
 "Waiting for experiment...";
 
-document.getElementById("analysis").innerHTML=
-"Run the simulation to generate analysis.";
 
-document.getElementById("status").innerHTML="";
+document.getElementById("analysis").innerHTML=
+"Run an experiment.";
+
+
+document.getElementById("status").innerHTML=
+"Waiting...";
+
 
 }
+
 
 
 reset();
