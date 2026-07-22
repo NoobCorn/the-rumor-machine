@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>The Rumor Machine</title>
+
+<style>
+/* =========================
+   CSS: Appearance
+   ========================= */
+
+body {
+    font-family: Georgia, serif;
+    max-width: 700px;
+    margin: 60px auto;
+    padding: 20px;
+    color: #222;
+    line-height: 1.6;
+}
+
+h1 {
+    font-weight: normal;
+}
+
+.subtitle {
+    color: #666;
+}
+
+button {
+    background: white;
+    border: 1px solid #333;
+    padding: 10px 18px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background: #f2f2f2;
+}
+
+#network {
+    position: relative;
+    height: 300px;
+    margin: 40px 0;
+}
+
+.person {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: #222;
+    border-radius: 50%;
+    transition: 0.4s;
+}
+
+.person.active {
+    transform: scale(1.8);
+    background: #777;
+}
+
+.line {
+    position: absolute;
+    height: 1px;
+    background: #ccc;
+    transform-origin: left center;
+}
+
+.box {
+    border-left: 3px solid #333;
+    padding-left: 15px;
+    margin-top: 30px;
+}
+
+.small {
+    color: #666;
+    font-size: 14px;
+}
+</style>
+</head>
+
+
+<body>
+
+<!-- =========================
+     HTML: Structure
+     ========================= -->
+
+<h1>The Rumor Machine</h1>
+
+<p class="subtitle">
+One message enters a network. Watch what happens when it travels.
+</p>
+
+
+<div id="network"></div>
+
+<button id="spreadButton">
+Spread the rumor
+</button>
+
+
+<div class="box">
+<p><strong>Original rumor:</strong></p>
+<p id="original"></p>
+
+<p><strong>Final version:</strong></p>
+<p id="result">Press the button.</p>
+</div>
+
+
+<div class="box small">
+
+<p><strong>What to notice</strong></p>
+
+<p>
+Run it multiple times. The starting message is identical,
+but the ending can change because the path and the small
+random changes are different each time.
+</p>
+
+<p>
+This model demonstrates how repeated transmission can create
+distortion. It does not represent real people perfectly:
+real rumors involve memory, emotions, incentives, culture,
+and many other factors.
+</p>
+
+<p>
+The randomness comes from the rules of the simulation:
+each person has a chance to alter the message when passing it on.
+</p>
+
+</div>
+
+
+
+<script>
+// =========================
+// JavaScript: Behavior
+// =========================
+
+
+const originalRumor =
+    "The science teacher might give a surprise quiz tomorrow.";
+
+
+const mutationOptions = [
+    "The science teacher might give a surprise quiz tomorrow.",
+    "The science teacher will probably give a quiz tomorrow.",
+    "The science teacher definitely announced a quiz tomorrow.",
+    "The science teacher announced a huge test tomorrow.",
+    "There is a major science test tomorrow."
+];
+
+
+const peopleCount = 20;
+const people = [];
+
+const network = document.getElementById("network");
+const result = document.getElementById("result");
+const original = document.getElementById("original");
+
+original.textContent = originalRumor;
+
+
+// Create random people positions
+for (let i = 0; i < peopleCount; i++) {
+
+    const person = document.createElement("div");
+    person.className = "person";
+
+    const x = Math.random() * 90;
+    const y = Math.random() * 80;
+
+    person.style.left = x + "%";
+    person.style.top = y + "%";
+
+    network.appendChild(person);
+
+    people.push({
+        element: person,
+        x,
+        y
+    });
+}
+
+
+// Connect nearby people visually
+for (let i = 0; i < peopleCount; i++) {
+
+    for (let j = i + 1; j < peopleCount; j++) {
+
+        if (Math.random() < 0.12) {
+
+            const line = document.createElement("div");
+            line.className = "line";
+
+            const dx = people[j].x - people[i].x;
+            const dy = people[j].y - people[i].y;
+
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            line.style.width = distance + "%";
+            line.style.left = people[i].x + "%";
+            line.style.top = people[i].y + "%";
+
+            const angle = Math.atan2(dy, dx);
+
+            line.style.transform =
+                `rotate(${angle}rad)`;
+
+            network.appendChild(line);
+        }
+    }
+}
+
+
+
+document.getElementById("spreadButton")
+.addEventListener("click", spreadRumor);
+
+
+
+function spreadRumor() {
+
+    result.textContent = "Spreading...";
+
+    people.forEach(person => {
+        person.element.classList.remove("active");
+    });
+
+
+    let currentMessage = originalRumor;
+
+    let currentPerson = Math.floor(
+        Math.random() * peopleCount
+    );
+
+
+    let pathLength = 8;
+
+    let step = 0;
+
+
+    const interval = setInterval(() => {
+
+        people[currentPerson]
+        .element.classList.add("active");
+
+
+        currentMessage =
+            mutateMessage(currentMessage);
+
+
+        currentPerson =
+            Math.floor(Math.random() * peopleCount);
+
+
+        step++;
+
+
+        if (step >= pathLength) {
+
+            clearInterval(interval);
+
+            result.textContent = currentMessage;
+
+            people.forEach(person => {
+                person.element.classList.remove("active");
+            });
+        }
+
+
+    }, 500);
+
+}
+
+
+
+function mutateMessage(message) {
+
+    // Small chance of changing the rumor.
+    // The randomness is the "dice" of this model.
+
+    if (Math.random() < 0.45) {
+
+        const possible =
+            mutationOptions.filter(
+                option => option !== message
+            );
+
+        return possible[
+            Math.floor(Math.random() * possible.length)
+        ];
+
+    }
+
+    return message;
+}
+
+</script>
+
+</body>
+</html>
